@@ -3,12 +3,13 @@ program wpn;
 uses
   System.StartUpCopy,
   FMX.Forms,
-  MainForm in 'MainForm.pas' {Form1};
+  MainForm in 'MainForm.pas' {FormMain},
+  wpnc in 'wpnc.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TFormMain, FormMain);
   Application.Run;
 end.
