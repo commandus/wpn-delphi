@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
-  <Transactions>
-    <Transaction>2018.08.18 13:28:22.159,=C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2018.08.18 13:29:25.121,C:\s\delphi\wpn\MainForm.fmx=C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Unit1.fmx</Transaction>
-    <Transaction>2018.08.18 13:29:25.121,C:\s\delphi\wpn\MainForm.pas=C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2018.08.18 13:29:33.455,C:\s\delphi\wpn\wpn.dproj=C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
-    <Transaction>2018.08.18 13:37:09.774,=C:\s\delphi\wpn\Unit1.pas</Transaction>
-    <Transaction>2018.08.18 13:37:35.390,C:\s\delphi\wpn\wpnc.pas=C:\s\delphi\wpn\Unit1.pas</Transaction>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.455,C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\s\delphi\wpn\wpn.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.774,=C:\s\delphi\wpn\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.390,C:\s\delphi\wpn\Unit1.pas=C:\s\delphi\wpn\wpnc.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.159,=C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.121,C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\s\delphi\wpn\MainForm.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.121,C:\Users\andrei\Documents\Embarcadero\Studio\Projects\Unit1.fmx=C:\s\delphi\wpn\MainForm.fmx</Transaction>
   </Transactions>
-  <ActiveMobileDevice>   <NoProfile iOSSimulator="iPhone5"/>
-  </ActiveMobileDevice>
+	<ActiveMobileDevice>
+		<NoProfile iOSSimulator="iPhone5"/>
+	</ActiveMobileDevice>
 </BorlandProject>

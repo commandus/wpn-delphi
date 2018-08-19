@@ -10,11 +10,13 @@ uses
 
 type
   TFormMain = class(TForm)
-    Button1: TButton;
+    BCurl: TButton;
     Label1: TLabel;
     Edit1: TEdit;
     Memo1: TMemo;
-    procedure Button1Click(Sender: TObject);
+    BGenerate: TButton;
+    procedure BCurlClick(Sender: TObject);
+    procedure BGenerateClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -28,7 +30,7 @@ implementation
 
 {$R *.fmx}
 
-procedure TFormMain.Button1Click(Sender: TObject);
+procedure TFormMain.BCurlClick(Sender: TObject);
 var
   cmd: AnsiString;
 	publicKey: AnsiString;
@@ -65,6 +67,18 @@ begin
     contentEncoding,
     expiration);
   Memo1.Lines.Add(cmd);
+end;
+
+procedure TFormMain.BGenerateClick(Sender: TObject);
+  var
+    privateKey: AnsiString;
+    publicKey: AnsiString;
+    authSecret: AnsiString;
+begin
+  generateVAPIDKeys(privateKey, publicKey, authSecret);
+  Memo1.Lines.Add(privateKey);
+  Memo1.Lines.Add(publicKey);
+  Memo1.Lines.Add(authSecret);
 end;
 
 end.

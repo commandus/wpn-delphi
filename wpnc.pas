@@ -5,7 +5,8 @@ interface
 type
   TVAPIDContentEncoding = (AESGCM, AES128GCM);
 
-// Wrapper
+// Wrappers
+
 function webpushVapidCmd(
 	const publicKey: AnsiString;
 	const privateKey: AnsiString;
@@ -19,11 +20,17 @@ function webpushVapidCmd(
 	expiration: Cardinal
 ): AnsiString;
 
+procedure generateVAPIDKeys(
+  var privateKey: AnsiString;
+  var publicKey: AnsiString;
+  var authSecret: AnsiString
+);
+
 implementation
 
 uses
   WinTypes, WinProcs;
-  
+
 type
   TwebpushVapidCmdC = function(
     retval: PAnsiChar;
@@ -40,10 +47,21 @@ type
     expiration: Cardinal
 ): Cardinal; cdecl;
 
-const 
+  TgenerateVAPIDKeysC = procedure
+  (
+    privateKey: PAnsiChar;
+    privateKeySize: Cardinal;
+    publicKey: PAnsiChar;
+    publicKeySize: Cardinal;
+    authSecret: PAnsiChar;
+    authSecretSize: Cardinal
+  ); cdecl;
+
+const
   CMD_MAX_SIZE = 4096;
 var
   iwebpushVapidCmdC: TwebpushVapidCmdC;
+  igenerateVAPIDKeysC: TgenerateVAPIDKeysC;
 
 function webpushVapidCmdC(
   retval: PAnsiChar;
@@ -60,6 +78,15 @@ function webpushVapidCmdC(
 	expiration: Cardinal
 ): Cardinal; cdecl; external 'wpn-c' name 'webpushVapidCmdC';
 
+procedure generateVAPIDKeysC(
+  privateKey: PAnsiChar;
+  privateKeySize: Cardinal;
+  publicKey: PAnsiChar;
+  publicKeySize: Cardinal;
+  authSecret: PAnsiChar;
+  authSecretSize: Cardinal
+ ); cdecl; external 'wpn-c' name 'generateVAPIDKeysC';
+
 function webpushVapidCmd(
 	const publicKey: AnsiString;
 	const privateKey: AnsiString;
@@ -73,10 +100,9 @@ function webpushVapidCmd(
 	expiration: Cardinal
 ): AnsiString;
   var retval: array[0..CMD_MAX_SIZE - 1] of AnsiChar;
-	var retvalsize: Cardinal;
 begin
   FillChar(retval, CMD_MAX_SIZE, 0);
-  retvalsize:= webpushVapidCmdC(
+  webpushVapidCmdC(
     @retval[0],
     CMD_MAX_SIZE,
     PAnsiChar(publicKey),
@@ -91,24 +117,47 @@ begin
   	expiration
   );
   Result:= AnsiString(retval);
-  
 end;
 
-function load(): TwebpushVapidCmdC;
+procedure generateVAPIDKeys(
+  var privateKey: AnsiString;
+  var publicKey: AnsiString;
+  var authSecret: AnsiString
+);
+var
+  privateKeyA: array[0..240] of AnsiChar;
+  publicKeyA: array[0..96] of AnsiChar;
+  authSecretA: array[0..48] of AnsiChar;
+begin
+  generateVAPIDKeysC(
+    privateKeyA,
+    240,
+    publicKeyA,
+    96,
+    authSecretA,
+    48
+  );
+  privateKey:= PAnsiChar(@privateKeyA);
+  publicKey:= PAnsiChar(@publicKeyA);
+  authSecret:= PAnsiChar(@authSecretA);
+end;
+
+function load(): Boolean;
 var
   h:  THandle;
   r: TwebpushVapidCmdC;
-begin  
-  Result:= Nil;
+begin
+  Result:= false;
   h:= LoadLibrary('wpn-c.dll');
   if h >= 32 then
   begin
-    r:= GetProcAddress(h, 'webpushVapidCmdC');
+    iwebpushVapidCmdC:= GetProcAddress(h, 'webpushVapidCmdC');
+    igenerateVAPIDKeysC:= GetProcAddress(h, 'generateVAPIDKeysC');
+    Result:= true;
   end;
   FreeLibrary(h);
-  Result:= r;
 end;
 
 begin
-  // iwebpushVapidCmdC:= load();
+  // load();
 end.
