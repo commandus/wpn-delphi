@@ -49,4 +49,11 @@ object FormMain: TFormMain
     Text = 'Generate'
     OnClick = BGenerateClick
   end
+  object BCheckin: TButton
+    Position.X = 360.000000000000000000
+    Position.Y = 136.000000000000000000
+    TabOrder = 6
+    Text = 'Checkin'
+    OnClick = BCheckinClick
+  end
 end

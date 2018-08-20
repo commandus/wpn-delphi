@@ -26,6 +26,11 @@ procedure generateVAPIDKeys(
   var authSecret: AnsiString
 );
 
+function checkIn(
+  var androidId: UInt64;
+	var securityToken: UInt64
+): Integer;
+
 implementation
 
 uses
@@ -57,11 +62,18 @@ type
     authSecretSize: Cardinal
   ); cdecl;
 
+  TcheckInC = function (
+    androidId: PUInt64;
+  	securityToken: PUInt64;
+    verbosity: Integer
+  ): Integer; cdecl;
+
 const
   CMD_MAX_SIZE = 4096;
 var
   iwebpushVapidCmdC: TwebpushVapidCmdC;
   igenerateVAPIDKeysC: TgenerateVAPIDKeysC;
+  icheckInC: TcheckInC;
 
 function webpushVapidCmdC(
   retval: PAnsiChar;
@@ -85,7 +97,13 @@ procedure generateVAPIDKeysC(
   publicKeySize: Cardinal;
   authSecret: PAnsiChar;
   authSecretSize: Cardinal
- ); cdecl; external 'wpn-c' name 'generateVAPIDKeysC';
+); cdecl; external 'wpn-c' name 'generateVAPIDKeysC';
+
+function checkInC (
+  androidId: PUInt64;
+	securityToken: PUInt64;
+  verbosity: Integer
+): Integer; cdecl; external 'wpn-c' name 'checkInC';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
@@ -153,9 +171,18 @@ begin
   begin
     iwebpushVapidCmdC:= GetProcAddress(h, 'webpushVapidCmdC');
     igenerateVAPIDKeysC:= GetProcAddress(h, 'generateVAPIDKeysC');
+    icheckInC:= GetProcAddress(h, 'checkInC');
     Result:= true;
   end;
   FreeLibrary(h);
+end;
+
+function checkIn(
+  var androidId: UInt64;
+	var securityToken: UInt64
+): Integer;
+begin
+  Result:= checkInC(@androidId, @securityToken, 0);
 end;
 
 begin

@@ -15,8 +15,10 @@ type
     Edit1: TEdit;
     Memo1: TMemo;
     BGenerate: TButton;
+    BCheckin: TButton;
     procedure BCurlClick(Sender: TObject);
     procedure BGenerateClick(Sender: TObject);
+    procedure BCheckinClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -29,6 +31,17 @@ var
 implementation
 
 {$R *.fmx}
+
+procedure TFormMain.BCheckinClick(Sender: TObject);
+  var androidId: UInt64;
+	var securityToken: UInt64;
+begin
+  androidId:= 0;
+  securityToken:= 0;
+  checkIn(androidId, securityToken);
+  Memo1.Lines.Add(IntToStr(androidId));
+  Memo1.Lines.Add(IntToStr(securityToken));
+end;
 
 procedure TFormMain.BCurlClick(Sender: TObject);
 var
