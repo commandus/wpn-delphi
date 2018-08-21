@@ -10,7 +10,7 @@ object FormMain: TFormMain
   DesignerMasterStyle = 0
   object BCurl: TButton
     Position.X = 80.000000000000000000
-    Position.Y = 136.000000000000000000
+    Position.Y = 104.000000000000000000
     TabOrder = 0
     Text = 'Curl'
     OnClick = BCurlClick
@@ -43,17 +43,24 @@ object FormMain: TFormMain
     Viewport.Height = 213.000000000000000000
   end
   object BGenerate: TButton
-    Position.X = 224.000000000000000000
-    Position.Y = 136.000000000000000000
+    Position.X = 176.000000000000000000
+    Position.Y = 104.000000000000000000
     TabOrder = 5
-    Text = 'Generate'
+    Text = 'Generate keys'
     OnClick = BGenerateClick
   end
   object BCheckin: TButton
-    Position.X = 360.000000000000000000
-    Position.Y = 136.000000000000000000
+    Position.X = 280.000000000000000000
+    Position.Y = 104.000000000000000000
     TabOrder = 6
     Text = 'Checkin'
     OnClick = BCheckinClick
+  end
+  object BRegister: TButton
+    Position.X = 376.000000000000000000
+    Position.Y = 104.000000000000000000
+    TabOrder = 7
+    Text = 'Register'
+    OnClick = BRegisterClick
   end
 end
