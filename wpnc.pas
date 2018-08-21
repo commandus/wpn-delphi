@@ -31,6 +31,13 @@ function checkIn(
 	var securityToken: UInt64
 ): Integer;
 
+function registerDevice(
+  var retGCMToken: AnsiString;
+  androidId: UInt64;
+  securityToken: UInt64;
+  const appId: AnsiString
+): Integer;
+
 implementation
 
 uses
@@ -68,12 +75,22 @@ type
     verbosity: Integer
   ): Integer; cdecl;
 
+  TregisterDeviceC = function  (
+    retGCMToken: PAnsiChar;
+    GCMTokenSize: Cardinal;
+    androidId: UInt64;
+    securityToken: UInt64;
+    appId: PAnsiChar;
+    verbosity:  Integer
+  ): Integer; cdecl;
+
 const
   CMD_MAX_SIZE = 4096;
 var
   iwebpushVapidCmdC: TwebpushVapidCmdC;
   igenerateVAPIDKeysC: TgenerateVAPIDKeysC;
   icheckInC: TcheckInC;
+  iregisterDeviceC: TregisterDeviceC;
 
 function webpushVapidCmdC(
   retval: PAnsiChar;
@@ -104,6 +121,16 @@ function checkInC (
 	securityToken: PUInt64;
   verbosity: Integer
 ): Integer; cdecl; external 'wpn-c' name 'checkInC';
+
+ // Register device and obtain GCM token
+function registerDeviceC (
+	retGCMToken: PAnsiChar;
+	GCMTokenSize: Cardinal;
+	androidId: UInt64;
+	securityToken: UInt64;
+	appId: PAnsiChar;
+	verbosity:  Integer
+): Integer; cdecl; external 'wpn-c' name 'registerDeviceC';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
@@ -148,12 +175,9 @@ var
   authSecretA: array[0..48] of AnsiChar;
 begin
   generateVAPIDKeysC(
-    privateKeyA,
-    240,
-    publicKeyA,
-    96,
-    authSecretA,
-    48
+    privateKeyA, 240,
+    publicKeyA, 96,
+    authSecretA, 48
   );
   privateKey:= PAnsiChar(@privateKeyA);
   publicKey:= PAnsiChar(@publicKeyA);
@@ -172,6 +196,7 @@ begin
     iwebpushVapidCmdC:= GetProcAddress(h, 'webpushVapidCmdC');
     igenerateVAPIDKeysC:= GetProcAddress(h, 'generateVAPIDKeysC');
     icheckInC:= GetProcAddress(h, 'checkInC');
+    iregisterDeviceC:= GetProcAddress(h, 'registerDeviceC');
     Result:= true;
   end;
   FreeLibrary(h);
@@ -183,6 +208,19 @@ function checkIn(
 ): Integer;
 begin
   Result:= checkInC(@androidId, @securityToken, 0);
+end;
+
+function registerDevice(
+  var retGCMToken: AnsiString;
+  androidId: UInt64;
+  securityToken: UInt64;
+  const appId: AnsiString
+): Integer;
+var
+  token: array[0..255] of AnsiChar;
+begin
+  Result:= registerDeviceC(token, 255, androidId, securityToken, PAnsiChar(appId), 0);
+  retGCMToken:= PAnsiChar(@token);
 end;
 
 begin

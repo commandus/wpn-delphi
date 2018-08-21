@@ -16,9 +16,11 @@ type
     Memo1: TMemo;
     BGenerate: TButton;
     BCheckin: TButton;
+    BRegister: TButton;
     procedure BCurlClick(Sender: TObject);
     procedure BGenerateClick(Sender: TObject);
     procedure BCheckinClick(Sender: TObject);
+    procedure BRegisterClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -83,15 +85,31 @@ begin
 end;
 
 procedure TFormMain.BGenerateClick(Sender: TObject);
-  var
-    privateKey: AnsiString;
-    publicKey: AnsiString;
-    authSecret: AnsiString;
+var
+  privateKey: AnsiString;
+  publicKey: AnsiString;
+  authSecret: AnsiString;
 begin
   generateVAPIDKeys(privateKey, publicKey, authSecret);
   Memo1.Lines.Add(privateKey);
   Memo1.Lines.Add(publicKey);
   Memo1.Lines.Add(authSecret);
+end;
+
+procedure TFormMain.BRegisterClick(Sender: TObject);
+var
+  r: Integer;
+  token: AnsiString;
+  androidId: UInt64;
+  securityToken: UInt64;
+  appId: AnsiString;
+begin
+  androidId:= 1;
+  securityToken:= 2;
+  appId:= '3';
+  r:= registerDevice(token, androidId, securityToken, appId);
+  Memo1.Lines.Add(intToStr(r));
+  Memo1.Lines.Add(token);
 end;
 
 end.
