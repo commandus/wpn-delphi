@@ -63,4 +63,11 @@ object FormMain: TFormMain
     Text = 'Register'
     OnClick = BRegisterClick
   end
+  object BQR: TButton
+    Position.X = 376.000000000000000000
+    Position.Y = 136.000000000000000000
+    TabOrder = 9
+    Text = 'QR'
+    OnClick = BQRClick
+  end
 end

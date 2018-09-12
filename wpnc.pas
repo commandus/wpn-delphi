@@ -38,10 +38,18 @@ function registerDevice(
   const appId: AnsiString
 ): Integer;
 
+function qr2string(
+    const value: AnsiString;
+    const mode: Integer
+): AnsiString;
+
 implementation
 
 uses
   WinTypes, WinProcs;
+
+const DLL_NAME: AnsiString = 'wpn-c.dll';
+const LIB = 'wpn-c';
 
 type
   TwebpushVapidCmdC = function(
@@ -69,13 +77,13 @@ type
     authSecretSize: Cardinal
   ); cdecl;
 
-  TcheckInC = function (
+  TcheckInC = function(
     androidId: PUInt64;
   	securityToken: PUInt64;
     verbosity: Integer
   ): Integer; cdecl;
 
-  TregisterDeviceC = function  (
+  TregisterDeviceC = function(
     retGCMToken: PAnsiChar;
     GCMTokenSize: Cardinal;
     androidId: UInt64;
@@ -84,6 +92,21 @@ type
     verbosity:  Integer
   ): Integer; cdecl;
 
+  {
+  Return QR lines using two pseudographics symbols full block (\u2588\u2588).
+  If retval is NULL, return required size
+  @param retval return buffer. Can be NULL
+  @param retsize return buffer size
+  @param value string to conversion
+  @param mode 0- pseudo graphics, 1- pseudo graphics inverted
+  }
+  Tqr2pchar = function(
+    retval: PAnsiChar;
+    retsize: UInt32;
+    const value: PAnsiChar;
+    const mode: Integer
+  ): UInt32; cdecl;
+
 const
   CMD_MAX_SIZE = 4096;
 var
@@ -91,6 +114,7 @@ var
   igenerateVAPIDKeysC: TgenerateVAPIDKeysC;
   icheckInC: TcheckInC;
   iregisterDeviceC: TregisterDeviceC;
+  iqr2pcharC: Tqr2pchar;
 
 function webpushVapidCmdC(
   retval: PAnsiChar;
@@ -105,7 +129,7 @@ function webpushVapidCmdC(
 	const contact: PAnsiChar;
 	contentEncoding: Integer;
 	expiration: Cardinal
-): Cardinal; cdecl; external 'wpn-c' name 'webpushVapidCmdC';
+): Cardinal; cdecl; external LIB name 'webpushVapidCmdC';
 
 procedure generateVAPIDKeysC(
   privateKey: PAnsiChar;
@@ -114,23 +138,30 @@ procedure generateVAPIDKeysC(
   publicKeySize: Cardinal;
   authSecret: PAnsiChar;
   authSecretSize: Cardinal
-); cdecl; external 'wpn-c' name 'generateVAPIDKeysC';
+); cdecl; external LIB name 'generateVAPIDKeysC';
 
 function checkInC (
   androidId: PUInt64;
 	securityToken: PUInt64;
   verbosity: Integer
-): Integer; cdecl; external 'wpn-c' name 'checkInC';
+): Integer; cdecl; external LIB name 'checkInC';
 
  // Register device and obtain GCM token
-function registerDeviceC (
+function registerDeviceC(
 	retGCMToken: PAnsiChar;
 	GCMTokenSize: Cardinal;
 	androidId: UInt64;
 	securityToken: UInt64;
 	appId: PAnsiChar;
 	verbosity:  Integer
-): Integer; cdecl; external 'wpn-c' name 'registerDeviceC';
+): Integer; cdecl; external LIB name 'registerDeviceC';
+
+function qr2pchar(
+  retval: PAnsiChar;
+  retsize: UInt32;
+  const value: PAnsiChar;
+  const mode: Integer
+): UInt32; cdecl; external LIB name 'qr2pchar';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
@@ -187,16 +218,16 @@ end;
 function load(): Boolean;
 var
   h:  THandle;
-  r: TwebpushVapidCmdC;
 begin
   Result:= false;
-  h:= LoadLibrary('wpn-c.dll');
+  h:= LoadLibraryA(PAnsiChar(DLL_NAME));
   if h >= 32 then
   begin
     iwebpushVapidCmdC:= GetProcAddress(h, 'webpushVapidCmdC');
     igenerateVAPIDKeysC:= GetProcAddress(h, 'generateVAPIDKeysC');
     icheckInC:= GetProcAddress(h, 'checkInC');
     iregisterDeviceC:= GetProcAddress(h, 'registerDeviceC');
+    iqr2pcharC:= GetProcAddress(h, 'qr2pchar');
     Result:= true;
   end;
   FreeLibrary(h);
@@ -221,6 +252,21 @@ var
 begin
   Result:= registerDeviceC(token, 255, androidId, securityToken, PAnsiChar(appId), 0);
   retGCMToken:= PAnsiChar(@token);
+end;
+
+function qr2string(
+    const value: AnsiString;
+    const mode: Integer
+): AnsiString;
+var
+  sz: Integer;
+begin
+  sz:= qr2pchar(Nil, 0, PAnsiChar(value), mode);
+  if (sz > 0) then begin
+     SetLength(Result, sz);
+     qr2pchar(PAnsiChar(@Result[1]), sz, PAnsiChar(value), mode);
+  end
+  else Result:= '';;
 end;
 
 begin

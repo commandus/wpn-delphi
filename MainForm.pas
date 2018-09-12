@@ -17,10 +17,12 @@ type
     BGenerate: TButton;
     BCheckin: TButton;
     BRegister: TButton;
+    BQR: TButton;
     procedure BCurlClick(Sender: TObject);
     procedure BGenerateClick(Sender: TObject);
     procedure BCheckinClick(Sender: TObject);
     procedure BRegisterClick(Sender: TObject);
+    procedure BQRClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -94,6 +96,12 @@ begin
   Memo1.Lines.Add(privateKey);
   Memo1.Lines.Add(publicKey);
   Memo1.Lines.Add(authSecret);
+end;
+
+procedure TFormMain.BQRClick(Sender: TObject);
+begin
+  //
+  Memo1.Lines.Add(qr2string('123', 0));
 end;
 
 procedure TFormMain.BRegisterClick(Sender: TObject);
