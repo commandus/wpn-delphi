@@ -102,10 +102,53 @@ type
   }
   Tqr2pchar = function(
     retval: PAnsiChar;
-    retsize: UInt32;
+    retsize: Cardinal;
     const value: PAnsiChar;
     const mode: Integer
-  ): UInt32; cdecl;
+  ): Cardinal; cdecl;
+
+  TNotifyMessageC = record
+  	authorizedEntity: PAnsiChar;	///< e.g. 246829423295
+    title: PAnsiChar;
+    body: PAnsiChar;
+    icon: PAnsiChar;				      ///< Specifies an icon filename or stock icon to display.
+    sound: PAnsiChar;				      ///< sound file name
+    link: PAnsiChar;				      ///< click action
+    linkType: PAnsiChar;			    ///< click action content type
+    urgency: Integer; 					  ///< low- 0, normal, critical
+    timeout: Integer; 					  ///< timeout in milliseconds at which to expire the notification.
+    category: PAnsiChar;
+    extra: PAnsiChar;
+    data: PAnsiChar;				      ///< extra data in JSON format
+  end;
+
+  TOnNotifyC = procedure(
+  	env: PVOID;
+    const persistent_id: PAnsiChar;
+    const from: PAnsiChar;
+    const appName: PAnsiChar;
+    const appId: PAnsiChar;
+    sent: UInt64;
+    const request: TNotifyMessageC
+  );
+
+  TOnLogC = procedure(
+  	env: PVOID;
+  	severity: Integer;
+	  const msg: PAnsiChar
+  );
+
+  Tclient = procedure(
+    const privateKey: PAnsiChar;
+    const authSecret: PAnsiChar;
+    androidId: UInt64;
+    securityToken: UInt64;
+    onNotify: TOnNotifyC;
+    onNotifyEnv: PVOID;
+    onLog: TOnLogC;
+    onLogEnv: PVOID;
+    verbosity: Integer
+);
 
 const
   CMD_MAX_SIZE = 4096;
@@ -115,6 +158,7 @@ var
   icheckInC: TcheckInC;
   iregisterDeviceC: TregisterDeviceC;
   iqr2pcharC: Tqr2pchar;
+  iclient: Tclient;
 
 function webpushVapidCmdC(
   retval: PAnsiChar;
@@ -158,10 +202,22 @@ function registerDeviceC(
 
 function qr2pchar(
   retval: PAnsiChar;
-  retsize: UInt32;
+  retsize: Cardinal;
   const value: PAnsiChar;
   const mode: Integer
-): UInt32; cdecl; external LIB name 'qr2pchar';
+): Cardinal; cdecl; external LIB name 'qr2pchar';
+
+procedure client(
+  const privateKey: PAnsiChar;
+  const authSecret: PAnsiChar;
+  androidId: UInt64;
+  securityToken: UInt64;
+  onNotify: TOnNotifyC;
+  onNotifyEnv: PVOID;
+  onLog: TOnLogC;
+  onLogEnv: PVOID;
+  verbosity: Integer
+); cdecl; external LIB name 'client';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
@@ -228,6 +284,7 @@ begin
     icheckInC:= GetProcAddress(h, 'checkInC');
     iregisterDeviceC:= GetProcAddress(h, 'registerDeviceC');
     iqr2pcharC:= GetProcAddress(h, 'qr2pchar');
+    iclient:= GetProcAddress(h, 'client');
     Result:= true;
   end;
   FreeLibrary(h);
