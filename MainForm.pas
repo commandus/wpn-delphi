@@ -1,4 +1,4 @@
-unit MainForm;
+﻿unit MainForm;
 
 interface
 
@@ -99,9 +99,12 @@ begin
 end;
 
 procedure TFormMain.BQRClick(Sender: TObject);
+var
+  s: AnsiString;
 begin
   //
-  Memo1.Lines.Add(qr2string('123', 0));
+  s:= qr2string('123', 0, UTF8Encode('██'), '  ');
+  Memo1.Lines.Add(UTF8Decode(s));
 end;
 
 procedure TFormMain.BRegisterClick(Sender: TObject);

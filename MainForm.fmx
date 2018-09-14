@@ -2,8 +2,8 @@ object FormMain: TFormMain
   Left = 0
   Top = 0
   Caption = 'wpn'
-  ClientHeight = 480
-  ClientWidth = 640
+  ClientHeight = 528
+  ClientWidth = 707
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
@@ -33,14 +33,17 @@ object FormMain: TFormMain
   object Memo1: TMemo
     Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
     DataDetectorTypes = []
-    Position.X = 80.000000000000000000
+    StyledSettings = [Size, Style, FontColor]
+    TextSettings.Font.Family = 'Courier New'
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Position.X = 16.000000000000000000
     Position.Y = 192.000000000000000000
-    Size.Width = 465.000000000000000000
-    Size.Height = 217.000000000000000000
+    Size.Width = 676.000000000000000000
+    Size.Height = 321.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
-    Viewport.Width = 461.000000000000000000
-    Viewport.Height = 213.000000000000000000
+    Viewport.Width = 672.000000000000000000
+    Viewport.Height = 317.000000000000000000
   end
   object BGenerate: TButton
     Position.X = 176.000000000000000000

@@ -40,7 +40,9 @@ function registerDevice(
 
 function qr2string(
     const value: AnsiString;
-    const mode: Integer
+    const mode: Integer;
+    const foregroundSymbols: AnsiString;
+    const backgroundSymbols: AnsiString
 ): AnsiString;
 
 implementation
@@ -104,7 +106,9 @@ type
     retval: PAnsiChar;
     retsize: Cardinal;
     const value: PAnsiChar;
-    const mode: Integer
+    const mode: Integer;
+    const foregroundSymbols: PAnsiChar;
+    const backgroundSymbols: PAnsiChar
   ): Cardinal; cdecl;
 
   TNotifyMessageC = record
@@ -204,7 +208,9 @@ function qr2pchar(
   retval: PAnsiChar;
   retsize: Cardinal;
   const value: PAnsiChar;
-  const mode: Integer
+  const mode: Integer;
+  const foregroundSymbols: PAnsiChar;
+  const backgroundSymbols: PAnsiChar
 ): Cardinal; cdecl; external LIB name 'qr2pchar';
 
 procedure client(
@@ -312,16 +318,20 @@ begin
 end;
 
 function qr2string(
-    const value: AnsiString;
-    const mode: Integer
+  const value: AnsiString;
+  const mode: Integer;
+  const foregroundSymbols: AnsiString;
+  const backgroundSymbols: AnsiString
 ): AnsiString;
 var
   sz: Integer;
 begin
-  sz:= qr2pchar(Nil, 0, PAnsiChar(value), mode);
+  sz:= qr2pchar(Nil, 0, PAnsiChar(value), mode,
+    PAnsiChar(foregroundSymbols), PAnsiChar(backgroundSymbols));
   if (sz > 0) then begin
      SetLength(Result, sz);
-     qr2pchar(PAnsiChar(@Result[1]), sz, PAnsiChar(value), mode);
+     qr2pchar(PAnsiChar(@Result[1]), sz, PAnsiChar(value), mode,
+       PAnsiChar(foregroundSymbols), PAnsiChar(backgroundSymbols));
   end
   else Result:= '';;
 end;
