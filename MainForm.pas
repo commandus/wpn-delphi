@@ -6,28 +6,42 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.Controls.Presentation, FMX.StdCtrls,
+  inifiles,
   wpnc, FMX.ScrollBox, FMX.Memo, FMX.Edit;
 
 type
   TFormMain = class(TForm)
     BCurl: TButton;
-    Label1: TLabel;
-    Edit1: TEdit;
     Memo1: TMemo;
     BGenerate: TButton;
     BCheckin: TButton;
     BRegister: TButton;
     BQR: TButton;
+    BInit: TButton;
+    Button1: TButton;
     procedure BCurlClick(Sender: TObject);
     procedure BGenerateClick(Sender: TObject);
     procedure BCheckinClick(Sender: TObject);
     procedure BRegisterClick(Sender: TObject);
     procedure BQRClick(Sender: TObject);
+    procedure BInitClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
+    privateKey: AnsiString;
+    publicKey: AnsiString;
+    authSecret: AnsiString;
+    androidId: UInt64;
+    securityToken: UInt64;
+    procedure load(const fn: AnsiString);
+    procedure save(const fn: AnsiString);
   public
     { Public declarations }
   end;
+
+const
+  INI = 'wpn.ini';
+  INI_SECTION_CLIENT = 'client';
 
 var
   FormMain: TFormMain;
@@ -98,6 +112,17 @@ begin
   Memo1.Lines.Add(authSecret);
 end;
 
+procedure TFormMain.BInitClick(Sender: TObject);
+begin
+  initClient(privateKey, publicKey, authSecret, androidId, securityToken);
+  Memo1.Lines.Add(privateKey);
+  Memo1.Lines.Add(publicKey);
+  Memo1.Lines.Add(authSecret);
+  Memo1.Lines.Add(IntToStr(androidId));
+  Memo1.Lines.Add(IntToStr(securityToken));
+  save(INI);
+end;
+
 procedure TFormMain.BQRClick(Sender: TObject);
 var
   s: AnsiString;
@@ -121,6 +146,57 @@ begin
   r:= registerDevice(token, androidId, securityToken, appId);
   Memo1.Lines.Add(intToStr(r));
   Memo1.Lines.Add(token);
+end;
+
+procedure TFormMain.load(const fn: AnsiString);
+var
+  f: TIniFile;
+  s: AnsiString;
+begin
+  f:= TIniFile.Create(GetHomePath + fn);
+  privateKey:= f.ReadString(INI_SECTION_CLIENT, 'privateKey', '');
+  publicKey:= f.ReadString(INI_SECTION_CLIENT, 'publicKey', '');
+  authSecret:= f.ReadString(INI_SECTION_CLIENT, 'authSecret', '');
+  s:= f.ReadString(INI_SECTION_CLIENT, 'androidId', '');
+  if Length(s) > 0 then begin
+    androidId:= Uint64.Parse(s);
+  end else begin
+    androidId:= 0;
+  end;
+
+  s:= f.ReadString(INI_SECTION_CLIENT, 'securityToken', '');
+  if Length(s) > 0 then begin
+    securityToken:= Uint64.Parse(s);
+  end else begin
+    securityToken:= 0;
+  end;
+
+  FreeAndNil(f);
+
+  Memo1.Lines.Add(privateKey);
+  Memo1.Lines.Add(publicKey);
+  Memo1.Lines.Add(authSecret);
+  Memo1.Lines.Add(IntToStr(androidId));
+  Memo1.Lines.Add(IntToStr(securityToken));
+
+end;
+
+procedure TFormMain.save(const fn: AnsiString);
+var
+  f: TIniFile;
+begin
+  f:= TIniFile.Create(GetHomePath + fn);
+  f.WriteString(INI_SECTION_CLIENT, 'privateKey', privateKey);
+  f.WriteString(INI_SECTION_CLIENT, 'publicKey', publicKey);
+  f.WriteString(INI_SECTION_CLIENT, 'authSecret', authSecret);
+  f.WriteString(INI_SECTION_CLIENT, 'androidId', Uint64.ToString(androidId));
+  f.WriteString(INI_SECTION_CLIENT, 'securityToken', Uint64.ToString(securityToken));
+  FreeAndNil(f);
+end;
+
+procedure TFormMain.FormCreate(Sender: TObject);
+begin
+  load(INI);
 end;
 
 end.

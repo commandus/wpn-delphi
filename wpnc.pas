@@ -38,6 +38,14 @@ function registerDevice(
   const appId: AnsiString
 ): Integer;
 
+function initClient(
+  var privateKey: AnsiString;
+  var publicKey: AnsiString;
+  var authSecret: AnsiString;
+  var androidId: UInt64;
+  var securityToken: UInt64
+): Integer;
+
 function qr2string(
     const value: AnsiString;
     const mode: Integer;
@@ -94,6 +102,17 @@ type
     verbosity:  Integer
   ): Integer; cdecl;
 
+  TinitClient = function(
+    privateKey: PAnsiChar;
+    privateKeySize: Cardinal;
+    publicKey: PAnsiChar;
+    publicKeySize: Cardinal;
+    authSecret: PAnsiChar;
+    authSecretSize: Cardinal;
+    androidId: PUInt64;
+    securityToken: PUInt64;
+    verbosity: Integer
+  ): Integer; cdecl;
   {
   Return QR lines using two pseudographics symbols full block (\u2588\u2588).
   If retval is NULL, return required size
@@ -163,6 +182,7 @@ var
   iregisterDeviceC: TregisterDeviceC;
   iqr2pcharC: Tqr2pchar;
   iclient: Tclient;
+  iinitClient: Tinitclient;
 
 function webpushVapidCmdC(
   retval: PAnsiChar;
@@ -203,6 +223,18 @@ function registerDeviceC(
 	appId: PAnsiChar;
 	verbosity:  Integer
 ): Integer; cdecl; external LIB name 'registerDeviceC';
+
+function initClientC(
+  privateKey: PAnsiChar;
+  privateKeySize: Cardinal;
+  publicKey: PAnsiChar;
+  publicKeySize: Cardinal;
+  authSecret: PAnsiChar;
+  authSecretSize: Cardinal;
+  androidId: PUInt64;
+  securityToken: PUInt64;
+  verbosity: Integer
+): Integer; cdecl; external LIB name 'initClientC';
 
 function qr2pchar(
   retval: PAnsiChar;
@@ -288,6 +320,7 @@ begin
     iwebpushVapidCmdC:= GetProcAddress(h, 'webpushVapidCmdC');
     igenerateVAPIDKeysC:= GetProcAddress(h, 'generateVAPIDKeysC');
     icheckInC:= GetProcAddress(h, 'checkInC');
+    iinitclient:= GetProcAddress(h, 'initClient');
     iregisterDeviceC:= GetProcAddress(h, 'registerDeviceC');
     iqr2pcharC:= GetProcAddress(h, 'qr2pchar');
     iclient:= GetProcAddress(h, 'client');
@@ -302,6 +335,29 @@ function checkIn(
 ): Integer;
 begin
   Result:= checkInC(@androidId, @securityToken, 0);
+end;
+
+function initClient(
+  var privateKey: AnsiString;
+  var publicKey: AnsiString;
+  var authSecret: AnsiString;
+  var androidId: UInt64;
+  var securityToken: UInt64
+): Integer;
+var
+  privateKeyA: array[0..240] of AnsiChar;
+  publicKeyA: array[0..96] of AnsiChar;
+  authSecretA: array[0..48] of AnsiChar;
+begin
+  Result:= initClientC(
+    privateKeyA, 240,
+    publicKeyA, 96,
+    authSecretA, 48,
+    @androidId, @securityToken, 0
+  );
+  privateKey:= PAnsiChar(@privateKeyA);
+  publicKey:= PAnsiChar(@publicKeyA);
+  authSecret:= PAnsiChar(@authSecretA);
 end;
 
 function registerDevice(
