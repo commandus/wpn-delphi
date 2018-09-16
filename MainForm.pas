@@ -28,6 +28,8 @@ type
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
+    appId: AnsiString;
+    registrationId: AnsiString;
     privateKey: AnsiString;
     publicKey: AnsiString;
     authSecret: AnsiString;
@@ -113,8 +115,14 @@ begin
 end;
 
 procedure TFormMain.BInitClick(Sender: TObject);
+var
+  guid: TGUID;
 begin
-  initClient(privateKey, publicKey, authSecret, androidId, securityToken);
+  CreateGUID(guid);
+  appId:= GUIDToString(guid);
+  initClient(registrationId, privateKey, publicKey, authSecret, androidId, securityToken, appId);
+  Memo1.Lines.Add(appId);
+  Memo1.Lines.Add(registrationId);
   Memo1.Lines.Add(privateKey);
   Memo1.Lines.Add(publicKey);
   Memo1.Lines.Add(authSecret);
@@ -154,6 +162,8 @@ var
   s: AnsiString;
 begin
   f:= TIniFile.Create(GetHomePath + fn);
+  appId:= f.ReadString(INI_SECTION_CLIENT, 'appId', '');
+  registrationId:= f.ReadString(INI_SECTION_CLIENT, 'registrationId', '');
   privateKey:= f.ReadString(INI_SECTION_CLIENT, 'privateKey', '');
   publicKey:= f.ReadString(INI_SECTION_CLIENT, 'publicKey', '');
   authSecret:= f.ReadString(INI_SECTION_CLIENT, 'authSecret', '');
@@ -172,12 +182,6 @@ begin
   end;
 
   FreeAndNil(f);
-
-  Memo1.Lines.Add(privateKey);
-  Memo1.Lines.Add(publicKey);
-  Memo1.Lines.Add(authSecret);
-  Memo1.Lines.Add(Uint64.ToString(androidId));
-  Memo1.Lines.Add(Uint64.ToString(securityToken));
 end;
 
 procedure TFormMain.save(const fn: AnsiString);
@@ -185,6 +189,8 @@ var
   f: TIniFile;
 begin
   f:= TIniFile.Create(GetHomePath + fn);
+  f.WriteString(INI_SECTION_CLIENT, 'appId', appId);
+  f.WriteString(INI_SECTION_CLIENT, 'registrationId', registrationId);
   f.WriteString(INI_SECTION_CLIENT, 'privateKey', privateKey);
   f.WriteString(INI_SECTION_CLIENT, 'publicKey', publicKey);
   f.WriteString(INI_SECTION_CLIENT, 'authSecret', authSecret);
@@ -196,6 +202,13 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 begin
   load(INI);
+  Memo1.Lines.Add(appId);
+  Memo1.Lines.Add(registrationId);
+  Memo1.Lines.Add(privateKey);
+  Memo1.Lines.Add(publicKey);
+  Memo1.Lines.Add(authSecret);
+  Memo1.Lines.Add(IntToStr(androidId));
+  Memo1.Lines.Add(IntToStr(securityToken));
 end;
 
 end.

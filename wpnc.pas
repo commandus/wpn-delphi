@@ -65,11 +65,13 @@ function registerDevice(
 ): Integer;
 
 function initClient(
+  var registrationId: AnsiString;
   var privateKey: AnsiString;
   var publicKey: AnsiString;
   var authSecret: AnsiString;
   var androidId: UInt64;
-  var securityToken: UInt64
+  var securityToken: UInt64;
+  const appId: AnsiString
 ): Integer;
 
 function qr2string(
@@ -280,6 +282,8 @@ function registerDeviceC(
 ): Integer; cdecl; external LIB name 'registerDeviceC';
 
 function initClientC(
+  retRegistrationId: PAnsiChar;
+  retsize: Cardinal;
   privateKey: PAnsiChar;
   privateKeySize: Cardinal;
   publicKey: PAnsiChar;
@@ -288,6 +292,7 @@ function initClientC(
   authSecretSize: Cardinal;
   androidId: PUInt64;
   securityToken: PUInt64;
+  appId: PAnsiChar;
   verbosity: Integer
 ): Integer; cdecl; external LIB name 'initClientC';
 
@@ -424,23 +429,28 @@ begin
 end;
 
 function initClient(
+  var registrationId: AnsiString;
   var privateKey: AnsiString;
   var publicKey: AnsiString;
   var authSecret: AnsiString;
   var androidId: UInt64;
-  var securityToken: UInt64
+  var securityToken: UInt64;
+  const appId: AnsiString
 ): Integer;
 var
+  registrationIdA: array[0..255] of AnsiChar;
   privateKeyA: array[0..240] of AnsiChar;
   publicKeyA: array[0..96] of AnsiChar;
   authSecretA: array[0..48] of AnsiChar;
 begin
   Result:= initClientC(
+    registrationIdA, 255,
     privateKeyA, 240,
     publicKeyA, 96,
     authSecretA, 48,
-    @androidId, @securityToken, 0
+    @androidId, @securityToken, PAnsiChar(appId), 0
   );
+  registrationId:= PAnsiChar(@registrationIdA);
   privateKey:= PAnsiChar(@privateKeyA);
   publicKey:= PAnsiChar(@publicKeyA);
   authSecret:= PAnsiChar(@authSecretA);
