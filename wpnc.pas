@@ -7,6 +7,32 @@ type
 
 // Wrappers
 
+{*
+ * Send VAPID web push using CURL (libcurl.dll)
+ * @param retval return string
+ * @param retvalsize can be 0
+ * @param publicKey e.g. "BM9Czc7rYYOinc7x_ALzqFgPSXV497qg76W6csYRtCFzjaFHGyuzP2a08l1vykEV1lgq6P83BOhB9xp-H5wCr1A";
+ * @param privateKey e.g. "_93..";
+ * @param endpoint recipient endpoint
+ * @param p256dh recipient key
+ * @param auth recipient key auth
+ * @param body JSON string message
+ * @param contact mailto:
+ * @param contentEncoding AESGCM or AES128GCM
+ * @return >0- HTTP code, <0- error code
+ *}
+function webpushVapid(
+	const publicKey: AnsiString;
+	const privateKey: AnsiString;
+	const endpoint: AnsiString;
+	const p256dh: AnsiString;
+	const auth: AnsiString;
+	const body: AnsiString;
+	const contact: AnsiString;
+	contentEncoding: TVAPIDContentEncoding;
+	expiration: Cardinal
+): AnsiString;
+
 function webpushVapidCmd(
 	const publicKey: AnsiString;
 	const privateKey: AnsiString;
@@ -75,7 +101,21 @@ type
     const contact: PAnsiChar;
     contentEncoding: Integer;
     expiration: Cardinal
-): Cardinal; cdecl;
+  ): Cardinal; cdecl;
+
+  TwebpushVapidC = function(
+    retval: PAnsiChar;
+    retvalsize: Cardinal;
+    const publicKey: PAnsiChar;
+    const privateKey: PAnsiChar;
+    const endpoint: PAnsiChar;
+    const p256dh: PAnsiChar;
+    const auth: PAnsiChar;
+    const body: PAnsiChar;
+    const contact: PAnsiChar;
+    contentEncoding: Integer;
+    expiration: Cardinal
+  ): Integer;
 
   TgenerateVAPIDKeysC = procedure
   (
@@ -177,6 +217,7 @@ const
   CMD_MAX_SIZE = 4096;
 var
   iwebpushVapidCmdC: TwebpushVapidCmdC;
+  iwebpushVapidC: TwebpushVapidC;
   igenerateVAPIDKeysC: TgenerateVAPIDKeysC;
   icheckInC: TcheckInC;
   iregisterDeviceC: TregisterDeviceC;
@@ -198,6 +239,20 @@ function webpushVapidCmdC(
 	contentEncoding: Integer;
 	expiration: Cardinal
 ): Cardinal; cdecl; external LIB name 'webpushVapidCmdC';
+
+function webpushVapidC(
+  retval: PAnsiChar;
+  retvalsize: Cardinal;
+  const publicKey: PAnsiChar;
+  const privateKey: PAnsiChar;
+  const endpoint: PAnsiChar;
+  const p256dh: PAnsiChar;
+  const auth: PAnsiChar;
+  const body: PAnsiChar;
+  const contact: PAnsiChar;
+  contentEncoding: Integer;
+  expiration: Cardinal
+): Integer; cdecl; external LIB name 'webpushVapidC';
 
 procedure generateVAPIDKeysC(
   privateKey: PAnsiChar;
@@ -289,6 +344,36 @@ begin
   Result:= AnsiString(retval);
 end;
 
+function webpushVapid(
+	const publicKey: AnsiString;
+	const privateKey: AnsiString;
+	const endpoint: AnsiString;
+	const p256dh: AnsiString;
+	const auth: AnsiString;
+	const body: AnsiString;
+	const contact: AnsiString;
+	contentEncoding: TVAPIDContentEncoding;
+	expiration: Cardinal
+): AnsiString;
+  var retval: array[0..CMD_MAX_SIZE - 1] of AnsiChar;
+begin
+  FillChar(retval, CMD_MAX_SIZE, 0);
+  webpushVapidC(
+    @retval[0],
+    CMD_MAX_SIZE,
+    PAnsiChar(publicKey),
+    PAnsiChar(privateKey),
+    PAnsiChar(endpoint),
+    PAnsiChar(p256dh),
+    PAnsiChar(auth),
+    PAnsiChar(body),
+    PAnsiChar(contact),
+    Ord(contentEncoding),
+  	expiration
+  );
+  Result:= AnsiString(retval);
+end;
+
 procedure generateVAPIDKeys(
   var privateKey: AnsiString;
   var publicKey: AnsiString;
@@ -318,6 +403,7 @@ begin
   if h >= 32 then
   begin
     iwebpushVapidCmdC:= GetProcAddress(h, 'webpushVapidCmdC');
+    iwebpushVapidC:= GetProcAddress(h, 'webpushVapidC');
     igenerateVAPIDKeysC:= GetProcAddress(h, 'generateVAPIDKeysC');
     icheckInC:= GetProcAddress(h, 'checkInC');
     iinitclient:= GetProcAddress(h, 'initClient');

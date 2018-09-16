@@ -176,9 +176,8 @@ begin
   Memo1.Lines.Add(privateKey);
   Memo1.Lines.Add(publicKey);
   Memo1.Lines.Add(authSecret);
-  Memo1.Lines.Add(IntToStr(androidId));
-  Memo1.Lines.Add(IntToStr(securityToken));
-
+  Memo1.Lines.Add(Uint64.ToString(androidId));
+  Memo1.Lines.Add(Uint64.ToString(securityToken));
 end;
 
 procedure TFormMain.save(const fn: AnsiString);
