@@ -69,10 +69,11 @@ object FormMain: TFormMain
     Text = 'Init client'
     OnClick = BInitClick
   end
-  object Button1: TButton
+  object BClient: TButton
     Position.X = 472.000000000000000000
     Position.Y = 48.000000000000000000
     TabOrder = 9
-    Text = 'Button1'
+    Text = 'Client'
+    OnClick = BClientClick
   end
 end

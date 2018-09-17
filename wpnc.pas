@@ -2,6 +2,9 @@ unit wpnc;
 
 interface
 
+uses
+  WinTypes;
+
 type
   TVAPIDContentEncoding = (AESGCM, AES128GCM);
 
@@ -74,6 +77,51 @@ function initClient(
   const appId: AnsiString
 ): Integer;
 
+type
+
+  TNotifyMessageC = record
+  	authorizedEntity: PAnsiChar;	///< e.g. 246829423295
+    title: PAnsiChar;
+    body: PAnsiChar;
+    icon: PAnsiChar;				      ///< Specifies an icon filename or stock icon to display.
+    sound: PAnsiChar;				      ///< sound file name
+    link: PAnsiChar;				      ///< click action
+    linkType: PAnsiChar;			    ///< click action content type
+    urgency: Integer; 					  ///< low- 0, normal, critical
+    timeout: Integer; 					  ///< timeout in milliseconds at which to expire the notification.
+    category: PAnsiChar;
+    extra: PAnsiChar;
+    data: PAnsiChar;				      ///< extra data in JSON format
+  end;
+
+  TOnNotifyC = procedure(
+    env: PVOID;
+    const persistent_id: PAnsiChar;
+    const from: PAnsiChar;
+    const appName: PAnsiChar;
+    const appId: PAnsiChar;
+    sent: UInt64;
+    const request: TNotifyMessageC
+  );
+
+  TOnLogC = procedure(
+    env: PVOID;
+    severity: Integer;
+    const msg: PAnsiChar
+  );
+
+function client(
+    const privateKey: AnsiString;
+    const authSecret: AnsiString;
+    androidId: UInt64;
+    securityToken: UInt64;
+    onNotify: TOnNotifyC;
+    onNotifyEnv: PVOID;
+    onLog: TOnLogC;
+    onLogEnv: PVOID;
+    verbosity: Integer
+): PVoid;
+
 function qr2string(
     const value: AnsiString;
     const mode: Integer;
@@ -84,7 +132,7 @@ function qr2string(
 implementation
 
 uses
-  WinTypes, WinProcs;
+  WinProcs;
 
 const DLL_NAME: AnsiString = 'wpn-c.dll';
 const LIB = 'wpn-c';
@@ -172,38 +220,7 @@ type
     const backgroundSymbols: PAnsiChar
   ): Cardinal; cdecl;
 
-  TNotifyMessageC = record
-  	authorizedEntity: PAnsiChar;	///< e.g. 246829423295
-    title: PAnsiChar;
-    body: PAnsiChar;
-    icon: PAnsiChar;				      ///< Specifies an icon filename or stock icon to display.
-    sound: PAnsiChar;				      ///< sound file name
-    link: PAnsiChar;				      ///< click action
-    linkType: PAnsiChar;			    ///< click action content type
-    urgency: Integer; 					  ///< low- 0, normal, critical
-    timeout: Integer; 					  ///< timeout in milliseconds at which to expire the notification.
-    category: PAnsiChar;
-    extra: PAnsiChar;
-    data: PAnsiChar;				      ///< extra data in JSON format
-  end;
-
-  TOnNotifyC = procedure(
-  	env: PVOID;
-    const persistent_id: PAnsiChar;
-    const from: PAnsiChar;
-    const appName: PAnsiChar;
-    const appId: PAnsiChar;
-    sent: UInt64;
-    const request: TNotifyMessageC
-  );
-
-  TOnLogC = procedure(
-  	env: PVOID;
-  	severity: Integer;
-	  const msg: PAnsiChar
-  );
-
-  Tclient = procedure(
+  Tclient = function(
     const privateKey: PAnsiChar;
     const authSecret: PAnsiChar;
     androidId: UInt64;
@@ -213,7 +230,7 @@ type
     onLog: TOnLogC;
     onLogEnv: PVOID;
     verbosity: Integer
-);
+): PVoid;
 
 const
   CMD_MAX_SIZE = 4096;
@@ -305,7 +322,7 @@ function qr2pchar(
   const backgroundSymbols: PAnsiChar
 ): Cardinal; cdecl; external LIB name 'qr2pchar';
 
-procedure client(
+function clientC(
   const privateKey: PAnsiChar;
   const authSecret: PAnsiChar;
   androidId: UInt64;
@@ -315,7 +332,7 @@ procedure client(
   onLog: TOnLogC;
   onLogEnv: PVOID;
   verbosity: Integer
-); cdecl; external LIB name 'client';
+): PVoid; cdecl; external LIB name 'client';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
@@ -454,6 +471,31 @@ begin
   privateKey:= PAnsiChar(@privateKeyA);
   publicKey:= PAnsiChar(@publicKeyA);
   authSecret:= PAnsiChar(@authSecretA);
+end;
+
+function client(
+    const privateKey: AnsiString;
+    const authSecret: AnsiString;
+    androidId: UInt64;
+    securityToken: UInt64;
+    onNotify: TOnNotifyC;
+    onNotifyEnv: PVOID;
+    onLog: TOnLogC;
+    onLogEnv: PVOID;
+    verbosity: Integer
+): PVoid;
+begin
+  clientC(
+    PAnsiChar(privateKey),
+    PAnsiChar(authSecret),
+    androidId,
+    securityToken,
+    onNotify,
+    onNotifyEnv,
+    onLog,
+    onLogEnv,
+    verbosity
+  );
 end;
 
 function registerDevice(

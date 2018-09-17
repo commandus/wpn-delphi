@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  Wintypes, System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.Controls.Presentation, FMX.StdCtrls,
   inifiles,
@@ -18,7 +18,7 @@ type
     BRegister: TButton;
     BQR: TButton;
     BInit: TButton;
-    Button1: TButton;
+    BClient: TButton;
     procedure BCurlClick(Sender: TObject);
     procedure BGenerateClick(Sender: TObject);
     procedure BCheckinClick(Sender: TObject);
@@ -26,8 +26,10 @@ type
     procedure BQRClick(Sender: TObject);
     procedure BInitClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure BClientClick(Sender: TObject);
   private
     { Private declarations }
+    pclient: PVoid;
     appId: AnsiString;
     registrationId: AnsiString;
     privateKey: AnsiString;
@@ -61,6 +63,42 @@ begin
   checkIn(androidId, securityToken);
   Memo1.Lines.Add(IntToStr(androidId));
   Memo1.Lines.Add(IntToStr(securityToken));
+end;
+
+procedure OnNotify(
+  env: PVOID;
+  const persistent_id: PAnsiChar;
+  const from: PAnsiChar;
+  const appName: PAnsiChar;
+  const appId: PAnsiChar;
+  sent: UInt64;
+  const request: TNotifyMessageC
+); cdecl;
+begin
+end;
+
+procedure OnLog(
+  env: PVOID;
+  severity: Integer;
+  const msg: PAnsiChar
+); cdecl;
+begin
+end;
+
+procedure TFormMain.BClientClick(Sender: TObject);
+begin
+  //
+  pclient:= client(
+    privateKey,
+    authSecret,
+    androidId,
+    securityToken,
+    @onNotify,
+    Nil,
+    @onLog,
+    Nil,
+    0
+  );
 end;
 
 procedure TFormMain.BCurlClick(Sender: TObject);
