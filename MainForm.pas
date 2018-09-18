@@ -75,6 +75,7 @@ procedure OnNotify(
   const request: TNotifyMessageC
 ); cdecl;
 begin
+  TFormMain(env).Memo1.Lines.Add('notify');
 end;
 
 procedure OnLog(
@@ -83,6 +84,7 @@ procedure OnLog(
   const msg: PAnsiChar
 ); cdecl;
 begin
+  TFormMain(env).Memo1.Lines.Add('log');
 end;
 
 procedure TFormMain.BClientClick(Sender: TObject);
@@ -94,11 +96,12 @@ begin
     androidId,
     securityToken,
     @onNotify,
-    Nil,
+    Self,
     @onLog,
-    Nil,
-    0
+    Self,
+    3
   );
+  Memo1.Lines.Add(IntToHex(Cardinal(pclient)));
 end;
 
 procedure TFormMain.BCurlClick(Sender: TObject);

@@ -485,7 +485,7 @@ function client(
     verbosity: Integer
 ): PVoid;
 begin
-  clientC(
+  Result:= clientC(
     PAnsiChar(privateKey),
     PAnsiChar(authSecret),
     androidId,
