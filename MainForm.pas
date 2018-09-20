@@ -18,7 +18,8 @@ type
     BRegister: TButton;
     BQR: TButton;
     BInit: TButton;
-    BClient: TButton;
+    BStart: TButton;
+    BStop: TButton;
     procedure BCurlClick(Sender: TObject);
     procedure BGenerateClick(Sender: TObject);
     procedure BCheckinClick(Sender: TObject);
@@ -26,7 +27,8 @@ type
     procedure BQRClick(Sender: TObject);
     procedure BInitClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure BClientClick(Sender: TObject);
+    procedure BStartClick(Sender: TObject);
+    procedure BStopClick(Sender: TObject);
   private
     { Private declarations }
     pclient: PVoid;
@@ -87,21 +89,34 @@ begin
   TFormMain(env).Memo1.Lines.Add('log');
 end;
 
-procedure TFormMain.BClientClick(Sender: TObject);
+procedure TFormMain.BStartClick(Sender: TObject);
 begin
   //
-  pclient:= client(
-    privateKey,
-    authSecret,
-    androidId,
-    securityToken,
-    @onNotify,
-    Self,
-    @onLog,
-    Self,
-    3
-  );
-  Memo1.Lines.Add(IntToHex(Cardinal(pclient)));
+  if pclient = Nil then
+  begin
+    pclient:= startClient(
+      privateKey,
+      authSecret,
+      androidId,
+      securityToken,
+      @onNotify,
+      Self,
+      @onLog,
+      Self,
+      3
+    );
+    Memo1.Lines.Add('Started');
+  end;
+end;
+
+procedure TFormMain.BStopClick(Sender: TObject);
+begin
+  if pclient <> Nil then
+  begin
+    stopClient(pclient);
+    pclient:= Nil;
+    Memo1.Lines.Add('Stopped');
+  end;
 end;
 
 procedure TFormMain.BCurlClick(Sender: TObject);

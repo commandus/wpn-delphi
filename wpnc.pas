@@ -110,7 +110,7 @@ type
     const msg: PAnsiChar
   );
 
-function client(
+  function startClient(
     const privateKey: AnsiString;
     const authSecret: AnsiString;
     androidId: UInt64;
@@ -120,14 +120,18 @@ function client(
     onLog: TOnLogC;
     onLogEnv: PVOID;
     verbosity: Integer
-): PVoid;
+  ): PVoid;
 
-function qr2string(
+  procedure stopClient(
+    client: PVoid
+  );
+
+  function qr2string(
     const value: AnsiString;
     const mode: Integer;
     const foregroundSymbols: AnsiString;
     const backgroundSymbols: AnsiString
-): AnsiString;
+  ): AnsiString;
 
 implementation
 
@@ -220,7 +224,7 @@ type
     const backgroundSymbols: PAnsiChar
   ): Cardinal; cdecl;
 
-  Tclient = function(
+  TstartClient = function(
     const privateKey: PAnsiChar;
     const authSecret: PAnsiChar;
     androidId: UInt64;
@@ -230,7 +234,11 @@ type
     onLog: TOnLogC;
     onLogEnv: PVOID;
     verbosity: Integer
-): PVoid;
+  ): PVoid;
+
+  TstopClient = procedure(
+    client: PVoid
+  );
 
 const
   CMD_MAX_SIZE = 4096;
@@ -241,7 +249,8 @@ var
   icheckInC: TcheckInC;
   iregisterDeviceC: TregisterDeviceC;
   iqr2pcharC: Tqr2pchar;
-  iclient: Tclient;
+  istartClient: TstartClient;
+  istopClient: TstopClient;
   iinitClient: Tinitclient;
 
 function webpushVapidCmdC(
@@ -322,7 +331,7 @@ function qr2pchar(
   const backgroundSymbols: PAnsiChar
 ): Cardinal; cdecl; external LIB name 'qr2pchar';
 
-function clientC(
+function startClientC(
   const privateKey: PAnsiChar;
   const authSecret: PAnsiChar;
   androidId: UInt64;
@@ -332,7 +341,11 @@ function clientC(
   onLog: TOnLogC;
   onLogEnv: PVOID;
   verbosity: Integer
-): PVoid; cdecl; external LIB name 'client';
+): PVoid; cdecl; external LIB name 'startClient';
+
+procedure stopClientC(
+  client: PVoid
+); cdecl; external LIB name 'stopClient';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
@@ -431,7 +444,8 @@ begin
     iinitclient:= GetProcAddress(h, 'initClient');
     iregisterDeviceC:= GetProcAddress(h, 'registerDeviceC');
     iqr2pcharC:= GetProcAddress(h, 'qr2pchar');
-    iclient:= GetProcAddress(h, 'client');
+    istartClient:= GetProcAddress(h, 'startClient');
+    istopClient:= GetProcAddress(h, 'stopClient');
     Result:= true;
   end;
   FreeLibrary(h);
@@ -473,7 +487,7 @@ begin
   authSecret:= PAnsiChar(@authSecretA);
 end;
 
-function client(
+function startClient(
     const privateKey: AnsiString;
     const authSecret: AnsiString;
     androidId: UInt64;
@@ -485,7 +499,7 @@ function client(
     verbosity: Integer
 ): PVoid;
 begin
-  Result:= clientC(
+  Result:= startClientC(
     PAnsiChar(privateKey),
     PAnsiChar(authSecret),
     androidId,
@@ -495,6 +509,15 @@ begin
     onLog,
     onLogEnv,
     verbosity
+  );
+end;
+
+procedure stopClient(
+  client: PVoid
+);
+begin
+  stopClientC(
+    client
   );
 end;
 
