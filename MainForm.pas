@@ -90,11 +90,14 @@ begin
 end;
 
 procedure TFormMain.BStartClick(Sender: TObject);
+var
+  r: Integer;
 begin
   //
   if pclient = Nil then
   begin
     pclient:= startClient(
+      r,
       privateKey,
       authSecret,
       androidId,

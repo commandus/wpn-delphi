@@ -111,6 +111,7 @@ type
   );
 
   function startClient(
+    var retcode: Integer;
     const privateKey: AnsiString;
     const authSecret: AnsiString;
     androidId: UInt64;
@@ -225,6 +226,7 @@ type
   ): Cardinal; cdecl;
 
   TstartClient = function(
+    var retcode: Integer;
     const privateKey: PAnsiChar;
     const authSecret: PAnsiChar;
     androidId: UInt64;
@@ -332,6 +334,7 @@ function qr2pchar(
 ): Cardinal; cdecl; external LIB name 'qr2pchar';
 
 function startClientC(
+  var retcode: Integer;
   const privateKey: PAnsiChar;
   const authSecret: PAnsiChar;
   androidId: UInt64;
@@ -488,6 +491,7 @@ begin
 end;
 
 function startClient(
+    var retcode: Integer;
     const privateKey: AnsiString;
     const authSecret: AnsiString;
     androidId: UInt64;
@@ -500,6 +504,7 @@ function startClient(
 ): PVoid;
 begin
   Result:= startClientC(
+    retcode,
     PAnsiChar(privateKey),
     PAnsiChar(authSecret),
     androidId,
