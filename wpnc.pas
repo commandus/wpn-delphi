@@ -198,6 +198,8 @@ type
   ): Integer; cdecl;
 
   TinitClient = function(
+    retRegistrationId: PAnsiChar;
+    retsize: Cardinal;
     privateKey: PAnsiChar;
     privateKeySize: Cardinal;
     publicKey: PAnsiChar;
@@ -331,7 +333,7 @@ function qr2pchar(
   const mode: Integer;
   const foregroundSymbols: PAnsiChar;
   const backgroundSymbols: PAnsiChar
-): Cardinal; cdecl; external LIB name 'qr2pchar';
+): Cardinal; cdecl; external LIB name 'qr2pcharC';
 
 function startClientC(
   var retcode: Integer;
@@ -344,11 +346,11 @@ function startClientC(
   onLog: TOnLogC;
   onLogEnv: PVOID;
   verbosity: Integer
-): PVoid; cdecl; external LIB name 'startClient';
+): PVoid; cdecl; external LIB name 'startClientC';
 
 procedure stopClientC(
   client: PVoid
-); cdecl; external LIB name 'stopClient';
+); cdecl; external LIB name 'stopClientC';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
