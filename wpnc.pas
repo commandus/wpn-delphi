@@ -134,6 +134,30 @@ type
     const backgroundSymbols: AnsiString
   ): AnsiString;
 
+  function subscribe(
+  	var retval: AnsiString;
+	  var retheaders: AnsiString;
+   	var rettoken: AnsiString;
+	  var retpushset: AnsiString;
+	  const receiverAndroidId: AnsiString;
+    const receiverSecurityToken: AnsiString;
+    const receiverAppId: AnsiString;
+    const authorizedEntity: AnsiString;
+    verbosity: Integer
+  ): Integer;
+
+  function unsubscribe(
+  	var retval: AnsiString;
+	  var retheaders: AnsiString;
+   	var rettoken: AnsiString;
+	  var retpushset: AnsiString;
+	  const receiverAndroidId: AnsiString;
+    const receiverSecurityToken: AnsiString;
+    const receiverAppId: AnsiString;
+    const authorizedEntity: AnsiString;
+    verbosity: Integer
+  ): Integer;
+
 implementation
 
 uses
@@ -197,7 +221,7 @@ type
     verbosity:  Integer
   ): Integer; cdecl;
 
-  TinitClient = function(
+  TinitClientC = function(
     retRegistrationId: PAnsiChar;
     retsize: Cardinal;
     privateKey: PAnsiChar;
@@ -218,7 +242,7 @@ type
   @param value string to conversion
   @param mode 0- pseudo graphics, 1- pseudo graphics inverted
   }
-  Tqr2pchar = function(
+  Tqr2pcharC = function(
     retval: PAnsiChar;
     retsize: Cardinal;
     const value: PAnsiChar;
@@ -227,7 +251,7 @@ type
     const backgroundSymbols: PAnsiChar
   ): Cardinal; cdecl;
 
-  TstartClient = function(
+  TstartClientC = function(
     var retcode: Integer;
     const privateKey: PAnsiChar;
     const authSecret: PAnsiChar;
@@ -240,9 +264,77 @@ type
     verbosity: Integer
   ): PVoid;
 
-  TstopClient = procedure(
+  TstopClientC = procedure(
     client: PVoid
   );
+
+ {
+   Make subscription
+   @param retval can be NULL
+   @param retvalsize buffer size, can be 0
+   @param retheaders can be NULL
+   @param retheaderssize buffer size, can be 0
+   @param rettoken return subscription token
+   @param rettokensize buffer size, can be 0
+   @param retpushset return subscription push set
+   @param retpushsetsize buffer size, can be 0
+   @param receiverAndroidId receiver Android id
+   @param receiverSecurityToken receiver security number
+   @param receiverAppId application identifier
+   @param authorizedEntity VAPID: Sender public key; GCM: project decimal number string "103953800507"
+   @param verbosity default 0- none
+   @return 200-299 - OK (HTTP code), less than 0- fatal error (see ERR_*)
+ }
+TsubscribeC = function
+(
+	retval: PANSIChar;
+	retvalsize: Cardinal;
+	retheaders: PANSIChar;
+	retheaderssize: Cardinal;
+ 	rettoken: PANSIChar;
+	rettokensize: Cardinal;
+	retpushset: PANSIChar;
+	retpushsetsize: Cardinal;
+	const receiverAndroidId: PANSIChar;
+	const receiverSecurityToken: PANSIChar;
+	const receiverAppId: PANSIChar;
+	const authorizedEntity: PANSIChar;
+	verbosity: Integer
+): Integer;
+
+ {
+   Unsubscribe
+   @param retval can be NULL
+   @param retvalsize buffer size, can be 0
+   @param retheaders can be NULL
+   @param retheaderssize buffer size, can be 0
+   @param rettoken return subscription token
+   @param rettokensize buffer size, can be 0
+   @param retpushset return subscription push set
+   @param retpushsetsize buffer size, can be 0
+   @param receiverAndroidId receiver Android id
+   @param receiverSecurityToken receiver security number
+   @param receiverAppId application identifier
+   @param authorizedEntity VAPID: Sender public key; GCM: project decimal number string "103953800507"
+   @param verbosity default 0- none
+   @return 200-299 - OK (HTTP code), less than 0- fatal error (see ERR_*)
+ }
+TunsubscribeC = function
+(
+	retval: PANSIChar;
+	retvalsize: Cardinal;
+	retheaders: PANSIChar;
+	retheaderssize: Cardinal;
+ 	rettoken: PANSIChar;
+	rettokensize: Cardinal;
+	retpushset: PANSIChar;
+	retpushsetsize: Cardinal;
+	const receiverAndroidId: PANSIChar;
+	const receiverSecurityToken: PANSIChar;
+	const receiverAppId: PANSIChar;
+	const authorizedEntity: PANSIChar;
+	verbosity: Integer
+): Integer;
 
 const
   CMD_MAX_SIZE = 4096;
@@ -252,10 +344,13 @@ var
   igenerateVAPIDKeysC: TgenerateVAPIDKeysC;
   icheckInC: TcheckInC;
   iregisterDeviceC: TregisterDeviceC;
-  iqr2pcharC: Tqr2pchar;
-  istartClient: TstartClient;
-  istopClient: TstopClient;
-  iinitClient: Tinitclient;
+  iqr2pcharC: Tqr2pcharC;
+  istartClient: TstartClientC;
+  istopClient: TstopClientC;
+  iinitClient: TinitclientC;
+  isubscribe: TsubscribeC;
+  iunsubscribe: TunsubscribeC;
+
 
 function webpushVapidCmdC(
   retval: PAnsiChar;
@@ -326,7 +421,7 @@ function initClientC(
   verbosity: Integer
 ): Integer; cdecl; external LIB name 'initClientC';
 
-function qr2pchar(
+function qr2pcharC(
   retval: PAnsiChar;
   retsize: Cardinal;
   const value: PAnsiChar;
@@ -351,6 +446,40 @@ function startClientC(
 procedure stopClientC(
   client: PVoid
 ); cdecl; external LIB name 'stopClientC';
+
+function subscribeC
+(
+	retval: PANSIChar;
+	retvalsize: Cardinal;
+	retheaders: PANSIChar;
+	retheaderssize: Cardinal;
+ 	rettoken: PANSIChar;
+	rettokensize: Cardinal;
+	retpushset: PANSIChar;
+	retpushsetsize: Cardinal;
+	const receiverAndroidId: PANSIChar;
+	const receiverSecurityToken: PANSIChar;
+	const receiverAppId: PANSIChar;
+	const authorizedEntity: PANSIChar;
+	verbosity: Integer
+): Integer; cdecl; external LIB name 'subscribeC';
+
+function unsubscribeC
+(
+	retval: PANSIChar;
+	retvalsize: Cardinal;
+	retheaders: PANSIChar;
+	retheaderssize: Cardinal;
+ 	rettoken: PANSIChar;
+	rettokensize: Cardinal;
+	retpushset: PANSIChar;
+	retpushsetsize: Cardinal;
+	const receiverAndroidId: PANSIChar;
+	const receiverSecurityToken: PANSIChar;
+	const receiverAppId: PANSIChar;
+	const authorizedEntity: PANSIChar;
+	verbosity: Integer
+): Integer; cdecl; external LIB name 'unsubscribeC';
 
 function webpushVapidCmd(
 	const publicKey: AnsiString;
@@ -446,11 +575,13 @@ begin
     iwebpushVapidC:= GetProcAddress(h, 'webpushVapidC');
     igenerateVAPIDKeysC:= GetProcAddress(h, 'generateVAPIDKeysC');
     icheckInC:= GetProcAddress(h, 'checkInC');
-    iinitclient:= GetProcAddress(h, 'initClient');
+    iinitclient:= GetProcAddress(h, 'initClientC');
     iregisterDeviceC:= GetProcAddress(h, 'registerDeviceC');
-    iqr2pcharC:= GetProcAddress(h, 'qr2pchar');
-    istartClient:= GetProcAddress(h, 'startClient');
-    istopClient:= GetProcAddress(h, 'stopClient');
+    iqr2pcharC:= GetProcAddress(h, 'qr2pcharC');
+    istartClient:= GetProcAddress(h, 'startClientC');
+    istopClient:= GetProcAddress(h, 'stopClientC');
+    isubscribe:= GetProcAddress(h, 'subscribeC');
+    iunsubscribe:= GetProcAddress(h, 'unsubscribeC');
     Result:= true;
   end;
   FreeLibrary(h);
@@ -550,14 +681,77 @@ function qr2string(
 var
   sz: Integer;
 begin
-  sz:= qr2pchar(Nil, 0, PAnsiChar(value), mode,
+  sz:= qr2pcharC(Nil, 0, PAnsiChar(value), mode,
     PAnsiChar(foregroundSymbols), PAnsiChar(backgroundSymbols));
   if (sz > 0) then begin
      SetLength(Result, sz);
-     qr2pchar(PAnsiChar(@Result[1]), sz, PAnsiChar(value), mode,
+     qr2pcharC(PAnsiChar(@Result[1]), sz, PAnsiChar(value), mode,
        PAnsiChar(foregroundSymbols), PAnsiChar(backgroundSymbols));
   end
   else Result:= '';;
+end;
+
+function subscribe(
+  var retval: AnsiString;
+  var retheaders: AnsiString;
+  var rettoken: AnsiString;
+  var retpushset: AnsiString;
+  const receiverAndroidId: AnsiString;
+  const receiverSecurityToken: AnsiString;
+  const receiverAppId: AnsiString;
+  const authorizedEntity: AnsiString;
+  verbosity: Integer
+): Integer;
+var
+  r: Integer;
+  retvalA: array[0..4095] of AnsiChar;
+  retheadersA: array[0..4095] of AnsiChar;
+  rettokenA: array[0..4095] of AnsiChar;
+  retpushsetA: array[0..4095] of AnsiChar;
+begin
+  r:= subscribeC(
+	  retvalA, 4096,
+	  retheadersA, 4096,
+    rettokenA, 4096,
+    retpushsetA, 4096,
+	  PAnsiChar(receiverAndroidId),
+	  PAnsiChar(receiverSecurityToken),
+	  PAnsiChar(receiverAppId),
+	  PAnsiChar(authorizedEntity),
+    verbosity
+  );
+end;
+
+
+function unsubscribe(
+  var retval: AnsiString;
+  var retheaders: AnsiString;
+  var rettoken: AnsiString;
+  var retpushset: AnsiString;
+  const receiverAndroidId: AnsiString;
+  const receiverSecurityToken: AnsiString;
+  const receiverAppId: AnsiString;
+  const authorizedEntity: AnsiString;
+  verbosity: Integer
+): Integer;
+var
+  r: Integer;
+  retvalA: array[0..4095] of AnsiChar;
+  retheadersA: array[0..4095] of AnsiChar;
+  rettokenA: array[0..4095] of AnsiChar;
+  retpushsetA: array[0..4095] of AnsiChar;
+begin
+  r:= unsubscribeC(
+	  retvalA, 4096,
+	  retheadersA, 4096,
+    rettokenA, 4096,
+    retpushsetA, 4096,
+	  PAnsiChar(receiverAndroidId),
+	  PAnsiChar(receiverSecurityToken),
+	  PAnsiChar(receiverAppId),
+	  PAnsiChar(authorizedEntity),
+    verbosity
+  );
 end;
 
 begin
